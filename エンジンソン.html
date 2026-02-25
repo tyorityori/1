@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>山周専用GGRサイト</title>
+</head>
+<body>
+  <h1>山周専用ググるサイト</h1>
+  <input id="q" type="text" placeholder="☆調べようぜ☆">
+  <button onclick="search()">🔍</button>
+
+  <script>
+    function search() {
+      const query = document.getElementById('q').value;
+      window.location.href = "https://www.google.com/search?q=" + encodeURIComponent(query);
+    }
+  </script>
+</body>
+</html>
