@@ -10,10 +10,9 @@
         text-align: center;
         padding-top: 120px;
         color: #004b6b;
-        transition: background 0.3s ease;
+        transition: background 0.6s ease, color 0.6s ease;
     }
 
-    /* タイトルアニメーション */
     h1 {
         font-size: 60px;
         margin-bottom: 10px;
@@ -21,6 +20,7 @@
         color: #0077aa;
         text-shadow: 2px 2px 0px white;
         animation: fadeIn 1s ease-out;
+        transition: color 0.6s ease;
     }
     @keyframes fadeIn {
         from { opacity: 0; transform: translateY(-20px); }
@@ -31,6 +31,7 @@
         font-size: 20px;
         margin-bottom: 40px;
         color: #005f85;
+        transition: color 0.6s ease;
     }
 
     .search-box {
@@ -39,6 +40,7 @@
         border-radius: 20px;
         display: inline-block;
         box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        transition: background 0.6s ease;
     }
 
     input {
@@ -48,9 +50,7 @@
         border: 2px solid #8cd8ff;
         font-size: 18px;
         outline: none;
-    }
-    input:focus {
-        border-color: #4cc7ff;
+        transition: border-color 0.6s ease, background 0.6s ease, color 0.6s ease;
     }
 
     button {
@@ -62,10 +62,7 @@
         color: white;
         font-size: 18px;
         cursor: pointer;
-        transition: 0.2s;
-    }
-    button:hover {
-        background: #32b8f5;
+        transition: 0.3s, background 0.6s ease;
     }
 
     select {
@@ -75,6 +72,7 @@
         border: 2px solid #8cd8ff;
         font-size: 16px;
         outline: none;
+        transition: border-color 0.6s ease, background 0.6s ease, color 0.6s ease;
     }
 
     .footer {
@@ -82,6 +80,57 @@
         font-size: 14px;
         color: #006a92;
         opacity: 0.7;
+        transition: color 0.6s ease;
+    }
+
+    /* ピンクモード */
+    body.pink {
+        background: linear-gradient(135deg, #ffd1e8, #ffe6f4);
+        color: #6b004b;
+    }
+    body.pink h1 { color: #cc2e8f; }
+    body.pink p, body.pink .footer { color: #8a005f; }
+    body.pink input { border-color: #ffb3d9; }
+    body.pink input:focus { border-color: #ff80c4; }
+    body.pink button { background: #ff80c4; }
+    body.pink button:hover { background: #ff66b8; }
+    body.pink select { border-color: #ffb3d9; }
+
+    /* パステルグリーンモード */
+    body.green {
+        background: linear-gradient(135deg, #d9ffe2, #eafff1);
+        color: #004b2e;
+    }
+    body.green h1 { color: #00aa66; }
+    body.green p, body.green .footer { color: #006644; }
+    body.green input { border-color: #a6ffd0; }
+    body.green input:focus { border-color: #66ffb3; }
+    body.green button { background: #66ffb3; }
+    body.green button:hover { background: #4de699; }
+    body.green select { border-color: #a6ffd0; }
+
+    /* ダークモード */
+    body.dark {
+        background: linear-gradient(135deg, #1a1a1a, #000000);
+        color: #e0e0e0;
+    }
+    body.dark h1 { color: #66c2ff; text-shadow: 2px 2px 0px black; }
+    body.dark p, body.dark .footer { color: #cccccc; }
+    body.dark input {
+        background: #333;
+        color: white;
+        border-color: #555;
+    }
+    body.dark input:focus { border-color: #66c2ff; }
+    body.dark button {
+        background: #444;
+        color: white;
+    }
+    body.dark button:hover { background: #555; }
+    body.dark select {
+        background: #333;
+        color: white;
+        border-color: #555;
     }
 </style>
 </head>
@@ -99,23 +148,138 @@
         <option value="https://www.bing.com/search?q=">Bing</option>
         <option value="https://duckduckgo.com/?q=">DuckDuckGo</option>
     </select>
+
+    <div style="margin-top: 20px;">
+        <label style="font-size: 18px;">
+            テーマ：
+            <select id="themeSelect" onchange="changeTheme()"
+                style="padding: 8px; border-radius: 10px; border: 2px solid #8cd8ff;">
+                <option value="sky">スカイブルー</option>
+                <option value="pink">ピンク</option>
+                <option value="green">パステルグリーン</option>
+                <option value="dark">ダーク</option>
+            </select>
+        </label>
+    </div>
 </div>
 
+<div id="history" style="margin-top: 30px;"></div>
+
 <div class="footer">
-    tyribrowser — made by tyori
+    tyoribrowser — made by tyori
 </div>
 
 <script>
+/* ======== 検索機能 ======== */
 function go() {
     const q = document.getElementById("search").value;
     const engine = document.getElementById("engine").value;
+
+    if (q.trim() !== "") saveHistory(q);
+
     window.location.href = engine + encodeURIComponent(q);
 }
 
-// Enterキーで検索
+/* Enterキーで検索 */
 document.getElementById("search").addEventListener("keydown", function(e) {
     if (e.key === "Enter") go();
 });
+
+/* ======== 履歴保存 ======== */
+function saveHistory(word) {
+    let history = JSON.parse(localStorage.getItem("searchHistory") || "[]");
+
+    history = history.filter(item => item !== word);
+    history.unshift(word);
+
+    if (history.length > 20) history.pop();
+
+    localStorage.setItem("searchHistory", JSON.stringify(history));
+    renderHistory();
+}
+
+/* ======== 履歴表示 ======== */
+function renderHistory() {
+    const history = JSON.parse(localStorage.getItem("searchHistory") || "[]");
+    const box = document.getElementById("history");
+
+    let html = `
+        <h3 id="history-title" style="cursor:pointer;" onclick="toggleHistory()">
+            検索履歴 <span id="arrow">▼</span>
+        </h3>
+        <div id="history-content" style="margin-top:10px;">
+    `;
+
+    if (history.length === 0) {
+        html += "<p>検索履歴はまだありません</p>";
+    } else {
+        html += `
+            <button onclick="clearHistory()" 
+                style="padding: 6px 12px; border-radius: 8px; border:none; background:#ffb3b3; color:white;">
+                履歴をすべて削除
+            </button>
+            <ul style='list-style:none; padding:0;'>
+        `;
+        history.forEach(item => {
+            html += `
+                <li style="margin: 6px 0;">
+                    <button onclick="useHistory('${item}')"
+                        style="padding: 8px 14px; border-radius: 10px; border:none; background:#e0f6ff;">
+                        ${item}
+                    </button>
+                </li>`;
+        });
+        html += "</ul>";
+    }
+
+    html += "</div>";
+    box.innerHTML = html;
+}
+
+function useHistory(word) {
+    document.getElementById("search").value = word;
+}
+
+function clearHistory() {
+    localStorage.removeItem("searchHistory");
+    renderHistory();
+}
+
+function toggleHistory() {
+    const content = document.getElementById("history-content");
+    const arrow = document.getElementById("arrow");
+
+    if (content.style.display === "none") {
+        content.style.display = "block";
+        arrow.textContent = "▼";
+    } else {
+        content.style.display = "none";
+        arrow.textContent = "▲";
+    }
+}
+
+/* ======== テーマ機能 ======== */
+function applyTheme() {
+    const theme = localStorage.getItem("theme") || "sky";
+
+    document.body.classList.remove("pink", "green", "dark");
+
+    if (theme !== "sky") document.body.classList.add(theme);
+
+    document.getElementById("themeSelect").value = theme;
+}
+
+function changeTheme() {
+    const theme = document.getElementById("themeSelect").value;
+    localStorage.setItem("theme", theme);
+    applyTheme();
+}
+
+/* ======== 初期化 ======== */
+window.onload = function() {
+    applyTheme();
+    renderHistory();
+};
 </script>
 
 </body>
