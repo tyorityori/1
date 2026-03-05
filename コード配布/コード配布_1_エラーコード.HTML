@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<title>無題</title>
+
+<style>
+body {
+    margin: 0;
+    height: 100vh;
+    background: #FFFFFF;
+    font-family: "Segoe UI", sans-serif;
+    overflow: hidden;
+    cursor: pointer;
+}
+
+h1 {
+    color: white;
+    text-align: center;
+    margin-top: 40vh;
+}
+
+/* ダイアログ */
+.win-box {
+    width: 360px;
+    background: #f3f3f3;
+    border-radius: 6px;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.4);
+    position: absolute;
+    animation: pop 0.15s ease-out;
+}
+
+.win-header {
+    background: #e1e1e1;
+    padding: 6px 10px;
+    font-size: 14px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-top-left-radius: 6px;
+    border-top-right-radius: 6px;
+}
+
+.close-btn {
+    width: 28px;
+    text-align: center;
+    cursor: pointer;
+    border-radius: 3px;
+}
+
+.close-btn:hover {
+    background: #e81123;
+    color: white;
+}
+
+.win-body {
+    display: flex;
+    padding: 18px;
+    gap: 12px;
+}
+
+.icon {
+    font-size: 32px;
+    color: #d13438;
+}
+
+.message {
+    font-size: 14px;
+}
+
+.win-footer {
+    padding: 8px;
+    text-align: right;
+}
+
+button {
+    padding: 5px 14px;
+    border: 1px solid #8c8c8c;
+    background: #e1e1e1;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+button:hover {
+    background: #d6d6d6;
+}
+
+@keyframes pop {
+    from { transform: scale(0.85); opacity: 0; }
+    to { transform: scale(1); opacity: 1; }
+}
+</style>
+</head>
+
+<body onclick="startVirus()">
+
+<h1>ジョークだよwよく気づいたねww</h1>
+
+<script>
+let started = false;
+
+function startVirus() {
+    if (started) return;
+    started = true;
+
+    // 最初の1個
+    createWindow();
+
+    // 無限増殖
+    setInterval(createWindow, 500);
+}
+
+function createWindow() {
+    const win = document.createElement("div");
+    win.className = "win-box";
+
+    const x = Math.random() * (window.innerWidth - 380);
+    const y = Math.random() * (window.innerHeight - 200);
+
+    win.style.left = x + "px";
+    win.style.top = y + "px";
+
+    win.innerHTML = `
+        <div class="win-header">
+            システムエラー
+            <div class="close-btn">✕</div>
+        </div>
+        <div class="win-body">
+            <div class="icon">⚠</div>
+            <div class="message">
+                <strong>あなたのPCはウイルスに感染しました。</strong><br><br>
+              
+            </div>
+        </div>
+        <div class="win-footer">
+            <button>OK</button>
+        </div>
+    `;
+
+    // ×とOKでそのウィンドウだけ消える
+    win.querySelector(".close-btn").onclick = () => win.remove();
+    win.querySelector("button").onclick = () => win.remove();
+
+    document.body.appendChild(win);
+}
+</script>
+
+</body>
+</html>
